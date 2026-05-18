@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe de Revisores — DOPA-e</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f6f6f6; color: #2c2c2a; padding: 24px; }
+    .page { max-width: 680px; margin: 0 auto; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .page-title { font-size: 18px; font-weight: 500; color: #2c2c2a; }
+    .page-sub { font-size: 13px; color: #888780; margin-top: 3px; }
+    .back-link { font-size: 12px; color: #185FA5; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; margin-bottom: 20px; display: inline-block; }
+    .btn { font-size: 12px; padding: 7px 14px; border-radius: 8px; cursor: pointer; border: 0.5px solid #d3d1c7; background: transparent; color: #2c2c2a; transition: all .12s; }
+    .btn:hover { background: #f1efe8; }
+    .btn-primary { background: #185FA5; color: #fff; border-color: #185FA5; }
+    .btn-primary:hover { background: #0C447C; }
+    .btn-danger { color: #A32D2D; border-color: #F09595; background: transparent; }
+    .btn-danger:hover { background: #FCEBEB; }
+    .btn-sm { font-size: 11px; padding: 4px 10px; }
+    .panel { background: #fff; border: 0.5px solid #e8e6de; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+    .panel-head { padding: 11px 16px; border-bottom: 0.5px solid #e8e6de; display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 11px; font-weight: 500; color: #888780; text-transform: uppercase; letter-spacing: .04em; }
+    .rev-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 0.5px solid #f1efe8; transition: background .12s; }
+    .rev-row:last-child { border-bottom: none; }
+    .rev-row:hover { background: #f5f4f0; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+    .av-a { background: #EEEDFE; color: #3C3489; }
+    .av-b { background: #E1F5EE; color: #085041; }
+    .av-c { background: #FAEEDA; color: #633806; }
+    .av-d { background: #E6F1FB; color: #0C447C; }
+    .rev-info { flex: 1; min-width: 0; }
+    .rev-name { font-size: 13px; font-weight: 500; color: #2c2c2a; }
+    .rev-meta { font-size: 11px; color: #888780; margin-top: 2px; }
+    .rev-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .badge { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+    .badge-green { background: #EAF3DE; color: #27500A; }
+    .badge-amber { background: #FAEEDA; color: #633806; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.25); align-items: center; justify-content: center; z-index: 100; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border: 0.5px solid #e8e6de; border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; margin: 0 16px; }
+    .modal-head { padding: 14px 16px; border-bottom: 0.5px solid #e8e6de; display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 14px; font-weight: 500; color: #2c2c2a; }
+    .modal-close { font-size: 20px; color: #888780; cursor: pointer; background: none; border: none; line-height: 1; }
+    .modal-body { padding: 16px; }
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: block; font-size: 11px; font-weight: 500; color: #888780; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .04em; }
+    .field input, .field select { width: 100%; font-size: 13px; padding: 8px 10px; border: 0.5px solid #d3d1c7; border-radius: 8px; background: #fff; color: #2c2c2a; outline: none; transition: border-color .12s; }
+    .field input:focus, .field select:focus { border-color: #185FA5; box-shadow: 0 0 0 2px rgba(24,95,165,.12); }
+    .modal-foot { padding: 12px 16px; border-top: 0.5px solid #e8e6de; display: flex; justify-content: flex-end; gap: 8px; }
+    .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.25); align-items: center; justify-content: center; z-index: 100; }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box { background: #fff; border: 0.5px solid #e8e6de; border-radius: 12px; width: 100%; max-width: 340px; overflow: hidden; margin: 0 16px; }
+    .confirm-body { padding: 20px 18px; }
+    .confirm-title { font-size: 14px; font-weight: 500; color: #2c2c2a; margin-bottom: 6px; }
+    .confirm-desc  { font-size: 12px; color: #888780; line-height: 1.55; }
+    .confirm-foot  { padding: 12px 16px; border-top: 0.5px solid #e8e6de; display: flex; justify-content: flex-end; gap: 8px; }
+    .toast { font-size: 12px; padding: 8px 14px; border-radius: 8px; margin-top: 12px; display: none; }
+    .toast-green { background: #E1F5EE; color: #085041; border: 0.5px solid #9FE1CB; }
+    .toast-red   { background: #FCEBEB; color: #791F1F; border: 0.5px solid #F09595; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1e1e1c; color: #d4d2c8; }
+      .page-title { color: #e8e6de; }
+      .page-sub, .panel-title, .rev-meta, .config-label { color: #888780; }
+      .panel { background: #2c2c2a; border-color: #3d3d3a; }
+      .panel-head { border-color: #3d3d3a; }
+      .rev-row { border-color: #3d3d3a; }
+      .rev-row:hover { background: #3d3d3a; }
+      .rev-name, .confirm-title, .modal-title { color: #e8e6de; }
+      .btn { border-color: #5f5e5a; color: #d4d2c8; }
+      .btn:hover { background: #3d3d3a; }
+      .btn-danger { color: #F7C1C1; border-color: #791F1F; }
+      .btn-danger:hover { background: #501313; }
+      .modal, .confirm-box { background: #2c2c2a; border-color: #3d3d3a; }
+      .modal-head, .modal-foot, .confirm-foot { border-color: #3d3d3a; }
+      .field input, .field select { background: #1e1e1c; border-color: #5f5e5a; color: #d4d2c8; }
+      .modal-close { color: #888780; }
+      .confirm-desc { color: #888780; }
+      .badge-green { background: #173404; color: #C0DD97; }
+      .badge-amber { background: #633806; color: #FAC775; }
+      .toast-green { background: #085041; color: #9FE1CB; border-color: #0F6E56; }
+      .toast-red   { background: #501313; color: #F7C1C1; border-color: #791F1F; }
+      .back-link { color: #85B7EB; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a href="distribuicao_revisao.html" class="back-link">← Voltar para distribuição</a>
+  <div class="page-header">
+    <div>
+      <div class="page-title">Equipe de revisores</div>
+      <div class="page-sub" id="team-count">4 revisores cadastrados</div>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('add')">+ Adicionar revisor</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Revisores cadastrados</span></div>
+    <div id="rev-list">
+      <div class="rev-row" id="row-tm"><div class="avatar av-a">TM</div><div class="rev-info"><div class="rev-name">Tamires Machado</div><div class="rev-meta">tamires.machado@portoalegre.rs.gov.br · Ramal 1231</div></div><span class="badge badge-green">Ativo</span><div class="rev-actions"><button class="btn btn-sm" onclick="openModal('edit','tm')">Editar</button><button class="btn btn-sm btn-danger" onclick="openConfirm('tm')">Remover</button></div></div>
+      <div class="rev-row" id="row-ks"><div class="avatar av-b">KS</div><div class="rev-info"><div class="rev-name">Kimberly Souza</div><div class="rev-meta">kimberly.souza@portoalegre.rs.gov.br · Ramal 3836</div></div><span class="badge badge-green">Ativo</span><div class="rev-actions"><button class="btn btn-sm" onclick="openModal('edit','ks')">Editar</button><button class="btn btn-sm btn-danger" onclick="openConfirm('ks')">Remover</button></div></div>
+      <div class="rev-row" id="row-jf"><div class="avatar av-c">JF</div><div class="rev-info"><div class="rev-name">Jessica Ferreira</div><div class="rev-meta">jessica.ferreira@portoalegre.rs.gov.br · Ramal 1248</div></div><span class="badge badge-green">Ativo</span><div class="rev-actions"><button class="btn btn-sm" onclick="openModal('edit','jf')">Editar</button><button class="btn btn-sm btn-danger" onclick="openConfirm('jf')">Remover</button></div></div>
+      <div class="rev-row" id="row-rp"><div class="avatar av-d">RP</div><div class="rev-info"><div class="rev-name">Roberto Pires</div><div class="rev-meta">roberto.pires@portoalegre.rs.gov.br · Ramal 2041</div></div><span class="badge badge-amber">Afastado</span><div class="rev-actions"><button class="btn btn-sm" onclick="openModal('edit','rp')">Editar</button><button class="btn btn-sm btn-danger" onclick="openConfirm('rp')">Remover</button></div></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head"><span class="modal-title" id="modal-title">Adicionar revisor</span><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Nome completo</label><input type="text" id="f-name" placeholder="Ex: Ana Paula Rodrigues"></div>
+      <div class="field"><label>E-mail institucional</label><input type="email" id="f-email" placeholder="nome@portoalegre.rs.gov.br"></div>
+      <div class="field"><label>Ramal</label><input type="text" id="f-ramal" placeholder="Ex: 1234"></div>
+      <div class="field"><label>Status</label><select id="f-status"><option value="ativo">Ativo</option><option value="afastado">Afastado</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" id="modal-save-btn" onclick="saveModal()">Adicionar</button></div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-body"><div class="confirm-title" id="confirm-title">Remover revisor?</div><div class="confirm-desc">Os atos atribuídos a este revisor voltarão para a fila de distribuição. Esta ação não pode ser desfeita.</div></div>
+    <div class="confirm-foot"><button class="btn" onclick="closeConfirm()">Cancelar</button><button class="btn btn-danger" onclick="doRemove()">Remover</button></div>
+  </div>
+</div>
+
+<script>
+const reviewers={tm:{name:'Tamires Machado',email:'tamires.machado@portoalegre.rs.gov.br',ramal:'1231',status:'ativo'},ks:{name:'Kimberly Souza',email:'kimberly.souza@portoalegre.rs.gov.br',ramal:'3836',status:'ativo'},jf:{name:'Jessica Ferreira',email:'jessica.ferreira@portoalegre.rs.gov.br',ramal:'1248',status:'ativo'},rp:{name:'Roberto Pires',email:'roberto.pires@portoalegre.rs.gov.br',ramal:'2041',status:'afastado'}};
+let modalMode='add',editTarget=null,removeTarget=null;
+const colors=['av-a','av-b','av-c','av-d'];
+function updateCount(){const n=Object.keys(reviewers).length;document.getElementById('team-count').textContent=n+' revisor'+(n===1?'':'es')+' cadastrado'+(n===1?'':'s');}
+function openModal(mode,id){modalMode=mode;editTarget=id||null;document.getElementById('modal-title').textContent=mode==='add'?'Adicionar revisor':'Editar revisor';document.getElementById('modal-save-btn').textContent=mode==='add'?'Adicionar':'Salvar';if(mode==='edit'&&id&&reviewers[id]){const r=reviewers[id];document.getElementById('f-name').value=r.name;document.getElementById('f-email').value=r.email;document.getElementById('f-ramal').value=r.ramal;document.getElementById('f-status').value=r.status;}else{document.getElementById('f-name').value='';document.getElementById('f-email').value='';document.getElementById('f-ramal').value='';document.getElementById('f-status').value='ativo';}document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function saveModal(){const name=document.getElementById('f-name').value.trim();const email=document.getElementById('f-email').value.trim();const ramal=document.getElementById('f-ramal').value.trim();const status=document.getElementById('f-status').value;if(!name||!email)return;if(modalMode==='edit'&&editTarget){reviewers[editTarget]={name,email,ramal,status};const row=document.getElementById('row-'+editTarget);if(row){row.querySelector('.rev-name').textContent=name;row.querySelector('.rev-meta').textContent=email+(ramal?' · Ramal '+ramal:'');const b=row.querySelector('.badge');b.textContent=status==='ativo'?'Ativo':'Afastado';b.className='badge '+(status==='ativo'?'badge-green':'badge-amber');}showToast(name+' atualizado.','green');}else{const initials=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();const av=colors[Object.keys(reviewers).length%4];const id='r'+Date.now();reviewers[id]={name,email,ramal,status};const row=document.createElement('div');row.className='rev-row';row.id='row-'+id;row.innerHTML='<div class="avatar '+av+'">'+initials+'</div><div class="rev-info"><div class="rev-name">'+name+'</div><div class="rev-meta">'+email+(ramal?' · Ramal '+ramal:'')+'</div></div><span class="badge '+(status==='ativo'?'badge-green':'badge-amber')+'">'+(status==='ativo'?'Ativo':'Afastado')+'</span><div class="rev-actions"><button class="btn btn-sm" onclick="openModal('edit',''+id+'')">Editar</button><button class="btn btn-sm btn-danger" onclick="openConfirm(''+id+'')">Remover</button></div>';document.getElementById('rev-list').appendChild(row);updateCount();showToast(name+' adicionado à equipe.','green');}closeModal();}
+function openConfirm(id){removeTarget=id;document.getElementById('confirm-title').textContent='Remover '+(reviewers[id]?reviewers[id].name:'revisor')+'?';document.getElementById('confirm-overlay').classList.add('open');}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');removeTarget=null;}
+function doRemove(){if(!removeTarget)return;const r=reviewers[removeTarget];const row=document.getElementById('row-'+removeTarget);if(row)row.remove();delete reviewers[removeTarget];updateCount();showToast((r?r.name:'Revisor')+' removido. Atos redistribuídos.','red');closeConfirm();}
+function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast toast-'+type;t.style.display='block';setTimeout(()=>t.style.display='none',3500);}
+</script>
+</body>
+</html>

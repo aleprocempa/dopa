@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distribuição de Revisão — DOPA-e</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: ##f6f6f6; color: #2c2c2a; padding: 24px; }
+    .page { max-width: 900px; margin: 0 auto; }
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+    .page-title { font-size: 18px; font-weight: 500; color: #2c2c2a; }
+    .page-sub { font-size: 13px; color: #888780; margin-top: 3px; }
+    .badge { font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+    .badge-teal { background: #E1F5EE; color: #085041; }
+    .badge-amber { background: #FAEEDA; color: #633806; }
+    .badge-gray { background: #F1EFE8; color: #444441; }
+    .badge-purple { background: #EEEDFE; color: #3C3489; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .panel { background: #fff; border: 0.5px solid #e8e6de; border-radius: 12px; overflow: hidden; }
+    .panel-head { padding: 11px 16px; border-bottom: 0.5px solid #e8e6de; display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 11px; font-weight: 500; color: #888780; text-transform: uppercase; letter-spacing: .04em; }
+    .act-list { padding: 6px 8px; }
+    .act-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; margin-bottom: 3px; transition: background .12s; }
+    .act-item:last-child { margin-bottom: 0; }
+    .act-item:hover { background: #f5f4f0; }
+    .act-item.selected { background: #E6F1FB; border-color: #85B7EB; }
+    .act-num { font-size: 11px; font-weight: 500; color: #888780; min-width: 28px; }
+    .act-info { flex: 1; min-width: 0; }
+    .act-title { font-size: 12px; color: #2c2c2a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .act-meta  { font-size: 11px; color: #888780; margin-top: 1px; }
+    .act-check { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid #d3d1c7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .12s; }
+    .act-item.selected .act-check { background: #185FA5; border-color: #185FA5; }
+    .checkmark { width: 8px; height: 8px; display: none; }
+    .act-item.selected .checkmark { display: block; }
+    .reviewer-list { padding: 6px 8px; }
+    .rev-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; margin-bottom: 4px; border: 1.5px solid transparent; cursor: pointer; transition: all .12s; }
+    .rev-item:hover { background: #f5f4f0; }
+    .rev-item.target { border-color: #85B7EB; background: #E6F1FB; }
+    .rev-item:last-child { margin-bottom: 0; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+    .av-a { background: #EEEDFE; color: #3C3489; }
+    .av-b { background: #E1F5EE; color: #085041; }
+    .av-c { background: #FAEEDA; color: #633806; }
+    .av-d { background: #E6F1FB; color: #0C447C; }
+    .rev-info { flex: 1; min-width: 0; }
+    .rev-name { font-size: 12px; font-weight: 500; color: #2c2c2a; }
+    .load-bar-bg { height: 3px; background: #e8e6de; border-radius: 2px; margin-top: 4px; }
+    .load-bar { height: 3px; border-radius: 2px; transition: width .4s; }
+    .load-low  { background: #1D9E75; }
+    .load-mid  { background: #EF9F27; }
+    .load-high { background: #E24B4A; }
+    .rev-count { font-size: 11px; color: #888780; text-align: right; white-space: nowrap; }
+    .rev-next  { font-size: 10px; color: #085041; font-weight: 500; }
+    .action-bar { padding: 10px 14px; border-top: 0.5px solid #e8e6de; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .action-hint { font-size: 11px; color: #888780; }
+    .btn { font-size: 12px; padding: 6px 14px; border-radius: 8px; cursor: pointer; border: 0.5px solid #d3d1c7; background: transparent; color: #2c2c2a; transition: all .12s; }
+    .btn:hover { background: #f1efe8; }
+    .btn-primary { background: #185FA5; color: #fff; border-color: #185FA5; }
+    .btn-primary:hover { background: #0C447C; }
+    .config-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-top: 0.5px solid #e8e6de; }
+    .config-label { font-size: 12px; color: #888780; }
+    .toggle { position: relative; width: 30px; height: 17px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider-t { position: absolute; inset: 0; background: #d3d1c7; border-radius: 9px; cursor: pointer; transition: background .2s; }
+    .slider-t:before { content: ''; position: absolute; width: 13px; height: 13px; left: 2px; top: 2px; background: white; border-radius: 50%; transition: transform .2s; }
+    .toggle input:checked + .slider-t { background: #185FA5; }
+    .toggle input:checked + .slider-t:before { transform: translateX(13px); }
+    .toast { font-size: 12px; padding: 8px 14px; border-radius: 8px; margin-top: 12px; display: none; }
+    .toast-green { background: #E1F5EE; color: #085041; border: 0.5px solid #9FE1CB; }
+    .team-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-top: 0.5px solid #e8e6de; }
+    .team-link { font-size: 11px; color: #185FA5; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1e1e1c; color: #d4d2c8; }
+      .page-title { color: #e8e6de; }
+      .page-sub, .panel-title, .action-hint, .config-label { color: #888780; }
+      .panel { background: #2c2c2a; border-color: #3d3d3a; }
+      .panel-head, .action-bar, .config-row, .team-row { border-color: #3d3d3a; }
+      .act-item:hover { background: #3d3d3a; }
+      .act-item.selected { background: #042C53; border-color: #0C447C; }
+      .act-title, .rev-name { color: #e8e6de; }
+      .act-num, .act-meta, .rev-count { color: #888780; }
+      .act-check { border-color: #5f5e5a; }
+      .rev-item:hover { background: #3d3d3a; }
+      .rev-item.target { background: #042C53; border-color: #0C447C; }
+      .load-bar-bg { background: #3d3d3a; }
+      .btn { border-color: #5f5e5a; color: #d4d2c8; }
+      .btn:hover { background: #3d3d3a; }
+      .slider-t { background: #5f5e5a; }
+      .badge-teal   { background: #085041; color: #9FE1CB; }
+      .badge-amber  { background: #633806; color: #FAC775; }
+      .badge-gray   { background: #444441; color: #D3D1C7; }
+      .badge-purple { background: #3C3489; color: #CECBF6; }
+      .toast-green  { background: #085041; color: #9FE1CB; border-color: #0F6E56; }
+      .team-link { color: #85B7EB; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Distribuição de revisão</div>
+      <div class="page-sub">Edição 7748 — Segunda-feira, 23 abr 2026</div>
+    </div>
+    <span class="badge badge-teal">Automático ativo</span>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Atos recebidos</span>
+        <span class="badge badge-gray" id="count-badge">8 aguardando</span>
+      </div>
+      <div class="act-list" id="act-list">
+        <div class="act-item" onclick="toggleAct(this,1)" data-id="1"><div class="act-check"><svg class="checkmark" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="act-num">#1821</div><div class="act-info"><div class="act-title">Decreto nº 23.748</div><div class="act-meta">Procuradoria-Geral · 09h12</div></div><span class="badge badge-purple" style="font-size:10px">Decreto</span></div>
+        <div class="act-item" onclick="toggleAct(this,2)" data-id="2"><div class="act-check"><svg class="checkmark" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="act-num">#1822</div><div class="act-info"><div class="act-title">Extrato de contrato</div><div class="act-meta">Sec. Saúde · 09h18</div></div><span class="badge badge-amber" style="font-size:10px">Contrato</span></div>
+        <div class="act-item" onclick="toggleAct(this,3)" data-id="3"><div class="act-check"><svg class="checkmark" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="act-num">#1823</div><div class="act-info"><div class="act-title">Portaria nº 412</div><div class="act-meta">Sec. Educação · 09h31</div></div><span class="badge badge-purple" style="font-size:10px">Portaria</span></div>
+        <div class="act-item" onclick="toggleAct(this,4)" data-id="4"><div class="act-check"><svg class="checkmark" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="act-num">#1824</div><div class="act-info"><div class="act-title">Dispensa de licitação</div><div class="act-meta">Sec. Fazenda · 09h44</div></div><span class="badge badge-gray" style="font-size:10px">Edital</span></div>
+        <div class="act-item" onclick="toggleAct(this,5)" data-id="5"><div class="act-check"><svg class="checkmark" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="act-num">#1825</div><div class="act-info"><div class="act-title">Extrato de termo aditivo</div><div class="act-meta">Sec. Obras · 10h02</div></div><span class="badge badge-amber" style="font-size:10px">Contrato</span></div>
+        <div class="act-item" onclick="toggleAct(this,6)" data-id="6"><div class="act-check"><svg class="checkmark" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="act-num">#1826</div><div class="act-info"><div class="act-title">Portaria nº 413</div><div class="act-meta">Sec. Planejamento · 10h15</div></div><span class="badge badge-purple" style="font-size:10px">Portaria</span></div>
+        <div class="act-item" onclick="toggleAct(this,7)" data-id="7"><div class="act-check"><svg class="checkmark" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="act-num">#1827</div><div class="act-info"><div class="act-title">Inexigibilidade nº 018</div><div class="act-meta">Sec. Cultura · 10h28</div></div><span class="badge badge-gray" style="font-size:10px">Edital</span></div>
+        <div class="act-item" onclick="toggleAct(this,8)" data-id="8"><div class="act-check"><svg class="checkmark" viewBox="0 0 8 8" fill="none"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="act-num">#1828</div><div class="act-info"><div class="act-title">Decreto nº 23.749</div><div class="act-meta">Procuradoria-Geral · 10h41</div></div><span class="badge badge-purple" style="font-size:10px">Decreto</span></div>
+      </div>
+      <div class="action-bar">
+        <span class="action-hint" id="sel-hint">Selecione para redistribuir</span>
+        <button class="btn" id="sel-all-btn" onclick="selectAll()">Selecionar todos</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Revisores</span>
+        <span class="badge badge-teal">Balanceamento automático</span>
+      </div>
+      <div class="reviewer-list">
+        <div class="rev-item" id="rev-1" onclick="assignTo(1)">
+          <div class="avatar av-a">TM</div>
+          <div class="rev-info"><div class="rev-name">Tamires M. <span class="rev-next" id="next-1">· próximo</span></div><div class="load-bar-bg"><div class="load-bar load-low" id="bar-1" style="width:30%"></div></div></div>
+          <div class="rev-count" id="count-1">3 itens</div>
+        </div>
+        <div class="rev-item" id="rev-2" onclick="assignTo(2)">
+          <div class="avatar av-b">KS</div>
+          <div class="rev-info"><div class="rev-name">Kimberly S.</div><div class="load-bar-bg"><div class="load-bar load-mid" id="bar-2" style="width:60%"></div></div></div>
+          <div class="rev-count" id="count-2">6 itens</div>
+        </div>
+        <div class="rev-item" id="rev-3" onclick="assignTo(3)">
+          <div class="avatar av-c">JF</div>
+          <div class="rev-info"><div class="rev-name">Jessica F.</div><div class="load-bar-bg"><div class="load-bar load-high" id="bar-3" style="width:85%"></div></div></div>
+          <div class="rev-count" id="count-3">9 itens</div>
+        </div>
+        <div class="rev-item" id="rev-4" onclick="assignTo(4)">
+          <div class="avatar av-d">RP</div>
+          <div class="rev-info"><div class="rev-name">Roberto P.</div><div class="load-bar-bg"><div class="load-bar load-low" id="bar-4" style="width:20%"></div></div></div>
+          <div class="rev-count" id="count-4">2 itens</div>
+        </div>
+      </div>
+      <div class="config-row">
+        <span class="config-label">Distribuir automaticamente ao receber</span>
+        <label class="toggle"><input type="checkbox" checked><span class="slider-t"></span></label>
+      </div>
+      <div class="action-bar">
+        <span class="action-hint" id="assign-hint">Selecione atos e clique num revisor</span>
+        <button class="btn btn-primary" onclick="autoDistribute()">Distribuir todos automaticamente</button>
+      </div>
+      <div class="team-row">
+        <span class="config-label" style="font-size:11px">Equipe de revisores</span>
+        <a href="gestao_equipe_revisores.html" class="team-link">Gerenciar equipe</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast toast-green" id="toast"></div>
+</div>
+<script>
+const selected = new Set();
+const loads = {1:3,2:6,3:9,4:2};
+const maxLoad = 10;
+function updateNextBadge(){const m=Object.entries(loads).sort((a,b)=>a[1]-b[1])[0][0];[1,2,3,4].forEach(i=>{const e=document.getElementById('next-'+i);if(e)e.textContent=i==m?'· próximo':''});}
+updateNextBadge();
+function updateBar(r){const b=document.getElementById('bar-'+r);const p=Math.min(100,Math.round(loads[r]/maxLoad*100));b.style.width=p+'%';b.className='load-bar '+(p<45?'load-low':p<75?'load-mid':'load-high');document.getElementById('count-'+r).textContent=loads[r]+' iten'+(loads[r]===1?'':'s');}
+function toggleAct(el,id){if(selected.has(id)){selected.delete(id);el.classList.remove('selected');}else{selected.add(id);el.classList.add('selected');}const n=selected.size;document.getElementById('sel-hint').textContent=n>0?n+' selecionado'+(n>1?'s':''):'Selecione para redistribuir';document.getElementById('assign-hint').textContent=n>0?'Clique num revisor para atribuir':'Selecione atos e clique num revisor';[1,2,3,4].forEach(i=>document.getElementById('rev-'+i).classList.toggle('target',n>0));}
+function selectAll(){const items=document.querySelectorAll('.act-item');const all=selected.size===items.length;items.forEach((el,idx)=>{const id=idx+1;if(all){selected.delete(id);el.classList.remove('selected');}else{selected.add(id);el.classList.add('selected');}});const n=selected.size;document.getElementById('sel-hint').textContent=n>0?n+' selecionados':'Selecione para redistribuir';document.getElementById('assign-hint').textContent=n>0?'Clique num revisor para atribuir':'Selecione atos e clique num revisor';document.getElementById('sel-all-btn').textContent=all?'Selecionar todos':'Desmarcar todos';[1,2,3,4].forEach(i=>document.getElementById('rev-'+i).classList.toggle('target',n>0));}
+function assignTo(rev){if(selected.size===0)return;const n=selected.size;loads[rev]+=n;updateBar(rev);updateNextBadge();selected.forEach(id=>{const el=document.querySelector('[data-id="'+id+'"]');if(el)el.remove();});selected.clear();document.getElementById('sel-hint').textContent='Selecione para redistribuir';document.getElementById('assign-hint').textContent='Selecione atos e clique num revisor';[1,2,3,4].forEach(i=>document.getElementById('rev-'+i).classList.remove('target'));showToast(n+' ato'+(n>1?'s':'')+' atribuído'+(n>1?'s':'')+' a '+['','Tamires M.','Kimberly S.','Jessica F.','Roberto P.'][rev]);const rem=document.querySelectorAll('.act-item').length;document.getElementById('count-badge').textContent=rem+' aguardando';}
+function autoDistribute(){const items=document.querySelectorAll('.act-item');let c=0;items.forEach(el=>{const m=parseInt(Object.entries(loads).sort((a,b)=>a[1]-b[1])[0][0]);loads[m]++;updateBar(m);el.remove();c++;});updateNextBadge();selected.clear();document.getElementById('count-badge').textContent='0 aguardando';showToast(c+' atos distribuídos automaticamente pelo balanceamento de carga');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3500);}
+</script>
+</body>
+</html>
