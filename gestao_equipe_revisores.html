@@ -100,13 +100,13 @@
       <div class="page-title">Equipe de editores</div>
       <div class="page-sub" id="team-count">4 editores cadastrados</div>
     </div>
-    <button class="btn btn-primary" onclick="openForm('add')">+ Adicionar revisor</button>
+    <button class="btn btn-primary" onclick="openForm('add')">+ Adicionar editor</button>
   </div>
 
   <!-- FORMULÁRIO INLINE -->
   <div class="form-panel" id="form-panel">
     <div class="form-head">
-      <span class="form-title" id="form-title">Novo revisor</span>
+      <span class="form-title" id="form-title">Novo editor</span>
       <button class="form-close" onclick="closeForm()">×</button>
     </div>
     <div class="form-body">
@@ -139,7 +139,7 @@
   <!-- CONFIRMAÇÃO INLINE -->
   <div class="confirm-panel" id="confirm-panel">
     <div class="confirm-text">
-      <div id="confirm-name">Remover revisor?</div>
+      <div id="confirm-name">Remover editor?</div>
       <div class="confirm-sub">Os atos atribuídos voltarão para a fila. Esta ação não pode ser desfeita.</div>
     </div>
     <div class="confirm-actions">
@@ -212,7 +212,7 @@ function updateCount() {
 function openForm(m, id) {
   mode = m; editTarget = id || null;
   closeConfirm();
-  document.getElementById('form-title').textContent = m === 'add' ? 'Novo revisor' : 'Editar revisor';
+  document.getElementById('form-title').textContent = m === 'add' ? 'Novo editor' : 'Editar editor';
   document.getElementById('form-save-btn').textContent = m === 'add' ? 'Adicionar' : 'Salvar';
   if (m === 'edit' && id && reviewers[id]) {
     const r = reviewers[id];
@@ -299,7 +299,7 @@ function doRemove() {
   if (row) row.remove();
   delete reviewers[removeTarget];
   updateCount();
-  showToast((r ? r.name : 'Revisor') + ' removido. Atos redistribuídos.', 'red');
+  showToast((r ? r.name : 'Editor') + ' removido. Atos redistribuídos.', 'red');
   closeConfirm();
 }
 
